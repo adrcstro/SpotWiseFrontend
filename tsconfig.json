@@ -1,0 +1,19 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "@/*": [
+        "./*" 
+      ]
+    },
+    "esModuleInterop": true,  // Enable ES module interoperability
+    "allowSyntheticDefaultImports": true  // Allow default imports for CommonJS modules
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts"
+, "app/(tabs)/scan.tsx"  ]
+}
