@@ -123,15 +123,6 @@ const pickImage = async () => {
 
   // Classify image
   const classifyImage = async () => {
-    console.log('Attempting to classify image with URI:', imageUri);
-  
-    // Validate that imageUri is non-null and valid
-    if (!imageUri || imageUri.trim() === '') {
-      console.warn('imageUri is null or empty');
-      Alert.alert('No Image', 'Please upload an image first!');
-      return;
-    }
-  
     setLoading(true);
   
     try {
@@ -151,7 +142,11 @@ const pickImage = async () => {
       const { class: diseaseClass, confidence, probabilities: prob } = response.data;
   
       if (diseaseClass && confidence && prob) {
-        setResult(`${diseaseClass} (${confidence})`);
+        if (diseaseClass === 'Unknown' || confidence < 80) {
+          setResult('Unknown'); // Explicitly set to "Unknown" here
+        } else {
+          setResult(`${diseaseClass} (${confidence})`);
+        }
         setProbabilities(prob);
       } else {
         Alert.alert('Classification Failed', 'Could not classify the image.');
@@ -166,6 +161,7 @@ const pickImage = async () => {
   
   
   
+  
 
   const resetResults = (clearImage = true) => {
     if (clearImage) {
@@ -177,11 +173,30 @@ const pickImage = async () => {
   
 
   const renderLineChart = () => {
+    // Show the reminder if the result is "Unknown"
+    if (result === 'Unknown') {
+      return (
+        <View style={styles.reminderContainer}>
+       <Text style={styles.reminderText}>
+  Ensure the image meets the following guidelines:
+</Text>
+<Text style={styles.reminderItem}>- Make the image close-up.</Text>
+<Text style={styles.reminderItem}>- Ensure the image is not blurred.</Text>
+<Text style={styles.reminderItem}>- Use good lighting.</Text>
+<Text style={styles.reminderItem}>- Avoid background distractions.</Text>
+<Text style={styles.reminderItem}>- Focus on the affected area.</Text>
+<Text style={styles.reminderItem}>- Hold the camera steady while taking the image.</Text>
+<Text style={styles.reminderItem}>- Make sure the affected area fills most of the frame.</Text>
+        </View>
+      );
+    }
+  
+    // Render the graph if the result is not "Unknown"
     if (!probabilities) return null;
-
+  
     const labels = Object.keys(probabilities);
     const data = Object.values(probabilities);
-
+  
     return (
       <View style={styles.chartWrapper}>
         <LineChart
@@ -209,6 +224,8 @@ const pickImage = async () => {
       </View>
     );
   };
+  
+  
 
   return (
     <View style={styles.container}>
@@ -363,7 +380,7 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 10,
   },
   resultContainer: {
-    marginTop: 25,
+    marginTop: 35,
     alignItems: 'center',
     padding: 16,
    
@@ -430,7 +447,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', // Center vertically within the row
     justifyContent: 'center', // Center horizontally within the row
     backgroundColor: '#72bf78',
-    paddingVertical: 15,
+    paddingVertical: 10,
     paddingHorizontal: 15,
     marginHorizontal: 5,
     borderRadius: 5,
@@ -442,6 +459,25 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginLeft: 5, // Add space between the icon and text
   },
+  reminderContainer: {
+    marginTop: 10,
+    padding: 16,
+    backgroundColor: '#333333',
+    borderRadius: 10,
+  },
+  reminderText: {
+    fontSize: 16,
+    color: 'white',
+    fontWeight: 'bold',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  reminderItem: {
+    fontSize: 14,
+    color: 'white',
+    marginBottom: 5,
+  },
+  
   
   
 });
